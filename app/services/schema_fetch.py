@@ -62,18 +62,31 @@ def get_trimmed_active_schemas(db: Session) -> dict:
 
 
 
-def build_engineered_prompt(trimmed_schemas: dict) -> str:
-    
-    #Converts the trimmed schemas dictionary into a natural-language formatted prompt
-    
-    prompt = "You are given the following active API endpoints grouped by service:\n\n"
+def build_engineered_prompt(trimmed_schema: dict) -> str:
+    prompt = "You are an API assistant.\n"
+    prompt += "Your job is to return a complete structured API request based on the user's goal.\n"
+    prompt += "Only respond with a JSON object like this:\n\n"
+    prompt += """{
+  "method": "GET",
+  "url": "/products/123",
+  "headers": {
+    "Content-Type": "application/json"
+  },
+  "body": {
+    "name": "Product A",
+    "price": 25.99
+  }
+}\n\n"""
+    prompt += "Here are the available API endpoints:\n\n"
 
-    for service, endpoints in trimmed_schemas.items():
+    for service, endpoints in trimmed_schema.items():
         prompt += f"Service: {service}\n"
-        for method_path, description in endpoints.items():
-            prompt += f"- {method_path}: {description}\n"
+        for method_path, desc in endpoints.items():
+            prompt += f"- {method_path}: {desc}\n"
         prompt += "\n"
 
-    prompt += "When the user types a prompt, match it with the most relevant endpoint from the list above."
+    prompt += "Now based on the user's prompt, return ONLY the full request as JSON. No extra text, no explanation."
+
     return prompt
+
 

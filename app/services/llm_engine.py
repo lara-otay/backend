@@ -1,11 +1,11 @@
-import os
+import json
 from openai import OpenAI
-from app.services.schema_fetch import build_engineered_prompt
+from app.services.schema_fetch import build_engineered_prompt  
+from app.core.config import settings  
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))  
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
-
-def ask_llm_for_endpoint(user_prompt: str, trimmed_schema: dict) -> str:
+def generate_structured_request(user_prompt: str, trimmed_schema: dict) -> dict:
     system_prompt = build_engineered_prompt(trimmed_schema)
 
     messages = [
@@ -17,7 +17,14 @@ def ask_llm_for_endpoint(user_prompt: str, trimmed_schema: dict) -> str:
         model="gpt-3.5-turbo",
         messages=messages,
         temperature=0.2,
-        max_tokens=300
+        max_tokens=500
     )
 
-    return response.choices[0].message.content
+    llm_output = response.choices[0].message.content
+
+    try:
+        structured_request = json.loads(llm_output)
+        return structured_request
+    except json.JSONDecodeError:
+        print("LLM response was not valid JSON:\n", llm_output)
+        raise ValueError("LLM did not return valid JSON. Please refine the prompt.")
