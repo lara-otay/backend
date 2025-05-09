@@ -85,7 +85,7 @@ def build_engineered_prompt(trimmed_schema: dict) -> str:
             prompt += f"- {method_path}: {desc}\n"
         prompt += "\n"
 
-    prompt += "Now based on the user's prompt, return ONLY the full request as JSON. No extra text, no explanation."
+    prompt += "Now based on the user's prompt, return ONLY the full request as JSON  No extra text, no explanation."
 
     return prompt
 
